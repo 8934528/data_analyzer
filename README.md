@@ -10,42 +10,33 @@ A comprehensive web-based data analysis platform that supports multiple file for
 
 ## Features
 
-### Multi-Format Support
+| Category | Feature | Description |
+|--------------------------------|---------------------|----------------------------------------------------------------|
+| **Multi-Format Support**       | CSV                 | Comma-separated values files                                   |
+| **Multi-Format Support**       | Excel               | Supports `.xlsx`, `.xls`, `.xlsb`, `.xltx` formats             |
+| **Multi-Format Support**       | OpenDocument        | `.ods` spreadsheet files                                       |
+| **Multi-Format Support**       | Parquet             | Efficient columnar storage format                              |
+| **Multi-Format Support**       | JSON                | JavaScript Object Notation                                     |
+| **KQL-Based Query Engine**     | KQL Syntax          | Kusto Query Language for data exploration                      |
+| **KQL-Based Query Engine**     | Real-Time Execution | Queries execute instantly                                      |
+| **KQL-Based Query Engine**     | Query Templates     | Built-in examples and reusable templates                       |
+| **KQL-Based Query Engine**     | Data Operations     | Filtering, aggregation, and transformation                     |
+| **Interactive Visualizations** | Chart Types         | Histograms, scatter, line, bar, box, heatmap, correlation, pie |
+| **Interactive Visualizations** | Plotly Support      | Interactive charts with zoom and pan                           |
+| **Interactive Visualizations** | Customization       | Configurable chart parameters                                  |
+| **Data Transformation**        | Aggregation         | Group-by operations                                            |
+| **Data Transformation**        | Advanced Filtering  | Multiple conditional filters                                   |
+| **Data Transformation**        | Pivot Tables        | Pivot table creation                                           |
+| **Data Transformation**        | Live Preview        | Real-time data preview                                         |
 
-- CSV: Comma-separated values files
-- Excel: .xlsx, .xls, .xlsb, .xltx formats
-- OpenDocument: .ods spreadsheets
-- Parquet: Efficient columnar storage format
-- JSON: JavaScript Object Notation
 
-### KQL-Based Query Engine
-
-- Kusto Query Language (KQL) syntax for data exploration
-- Real-time query execution
-- Built-in query examples and templates
-- Support for filtering, aggregation, and transformation
-
-### Interactive Visualizations
-
-- Histograms, scatter plots, line charts, bar charts
-- Box plots, heatmaps, correlation matrices, pie charts
-- Interactive Plotly charts with zoom and pan
-- Customizable chart parameters
-
-### Data Transformation
-
-- Aggregation with group by operations
-- Advanced filtering with multiple conditions
-- Pivot table creation
-- Real-time data preview
-
-### Export Capabilities
+## Export Capabilities
 
 - Multiple output formats: CSV, Excel, JSON, Parquet
 - Download processed data
 - Session management
 
-### User-Friendly Interface
+## User-Friendly Interface
 
 - Modern web-based UI
 - Drag & drop file upload
