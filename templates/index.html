@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Analysis</title>
+    <link rel="icon" type="image/x-icon" href="../static/assets/favicon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .sidebar {
+            background-color: #2c3e50;
+            color: white;
+            min-height: calc(100vh - 56px);
+            padding-top: 20px;
+        }
+
+        .sidebar a {
+            color: #ecf0f1;
+            text-decoration: none;
+            display: block;
+            padding: 10px 20px;
+            border-left: 4px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: #34495e;
+            border-left: 4px solid #3498db;
+            color: white;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            border-color: #3498db;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+
+        .data-table {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .kql-editor {
+            font-family: 'Courier New', monospace;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px;
+            border-radius: 4px;
+            min-height: 100px;
+        }
+
+        .plot-container {
+            background-color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload-area:hover {
+            background-color: #e3f2fd;
+            border-color: #2980b9;
+        }
+
+        .file-upload-area i {
+            font-size: 48px;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+
+        .tab-content {
+            padding: 20px 0;
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            min-width: 300px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chart-line me-2"></i>Data Analysis
+            </a>
+            <div class="navbar-text">
+                <span id="session-info" class="text-light"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" onclick="showSection('upload')">
+                                <i class="fas fa-upload me-2"></i>Upload Data
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('preview')">
+                                <i class="fas fa-table me-2"></i>Data Preview
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('statistics')">
+                                <i class="fas fa-chart-bar me-2"></i>Statistics
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('clean')">
+                                <i class="fas fa-broom me-2"></i>Clean Data
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('kql')">
+                                <i class="fas fa-search me-2"></i>KQL Query
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('visualize')">
+                                <i class="fas fa-chart-pie me-2"></i>Visualize
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('transform')">
+                                <i class="fas fa-cogs me-2"></i>Transform
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('export')">
+                                <i class="fas fa-download me-2"></i>Export
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-9 col-lg-10 ms-sm-auto px-md-4 main-content">
+                <!-- Notification -->
+                <div id="notification" class="notification alert alert-dismissible fade" role="alert">
+                    <span id="notification-message"></span>
+                    <button type="button" class="btn-close" onclick="hideNotification()"></button>
+                </div>
+
+                <!-- Upload Section -->
+                <div id="upload-section" class="section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-upload me-2"></i>Upload Data File</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="file-upload-area"
+                                        onclick="document.getElementById('file-input').click()">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <h4>Drag & Drop or Click to Upload</h4>
+                                        <p class="text-muted">Supported formats: CSV, Excel (xlsx, xls, xlsb), ODS,
+                                            Parquet, JSON</p>
+                                        <p class="text-muted">Maximum file size: 16MB</p>
+                                    </div>
+                                    <input type="file" title="input" id="file-input" class="d-none"
+                                        accept=".csv,.xlsx,.xls,.xlsb,.xltx,.ods,.parquet,.json">
+
+                                    <div class="mt-3">
+                                        <h6>Sample Datasets:</h6>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <button class="btn btn-outline-primary btn-sm"
+                                                onclick="loadSample('sales')">
+                                                <i class="fas fa-store me-1"></i>Sales Data
+                                            </button>
+                                            <button class="btn btn-outline-primary btn-sm"
+                                                onclick="loadSample('financial')">
+                                                <i class="fas fa-chart-line me-1"></i>Financial Data
+                                            </button>
+                                            <button class="btn btn-outline-primary btn-sm"
+                                                onclick="loadSample('customer')">
+                                                <i class="fas fa-users me-1"></i>Customer Data
+                                            </button>
+                                            <button class="btn btn-outline-primary btn-sm" onclick="loadSample('log')">
+                                                <i class="fas fa-server me-1"></i>Log Data
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-info text-white">
+                                            <h6><i class="fas fa-info-circle me-2"></i>Quick Start</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ol class="list-group list-group-numbered">
+                                                <li class="list-group-item border-0 p-1">Upload your data file</li>
+                                                <li class="list-group-item border-0 p-1">Preview and clean data</li>
+                                                <li class="list-group-item border-0 p-1">Analyze with KQL queries</li>
+                                                <li class="list-group-item border-0 p-1">Create visualizations</li>
+                                                <li class="list-group-item border-0 p-1">Export results</li>
+                                            </ol>
+                                        </div>
+                                    </div>
+
+                                    <div class="card mt-3">
+                                        <div class="card-header bg-success text-white">
+                                            <h6><i class="fas fa-lightbulb me-2"></i>Tips</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled mb-0">
+                                                <li><i class="fas fa-check-circle text-success me-2"></i>Use CSV for
+                                                    simple data</li>
+                                                <li><i class="fas fa-check-circle text-success me-2"></i>Excel for
+                                                    multiple sheets</li>
+                                                <li><i class="fas fa-check-circle text-success me-2"></i>Parquet for
+                                                    large datasets</li>
+                                                <li><i class="fas fa-check-circle text-success me-2"></i>Clean data
+                                                    before analysis</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="file-info" class="card" style="display: none;">
+                        <div class="card-header bg-success text-white">
+                            <h5><i class="fas fa-check-circle me-2"></i>File Uploaded Successfully</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>File Information:</h6>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>File Name:</strong></td>
+                                            <td id="info-filename"></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>File Size:</strong></td>
+                                            <td id="info-filesize"></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Rows:</strong></td>
+                                            <td id="info-rows"></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Columns:</strong></td>
+                                            <td id="info-columns"></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Quick Actions:</h6>
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-primary" onclick="showSection('preview')">
+                                            <i class="fas fa-eye me-2"></i>Preview Data
+                                        </button>
+                                        <button class="btn btn-outline-primary" onclick="showSection('statistics')">
+                                            <i class="fas fa-chart-bar me-2"></i>View Statistics
+                                        </button>
+                                        <button class="btn btn-outline-primary" onclick="showSection('clean')">
+                                            <i class="fas fa-broom me-2"></i>Clean Data
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview Section -->
+                <div id="preview-section" class="section" style="display: none;">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-table me-2"></i>Data Preview</h5>
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary me-2" onclick="loadPreview(1)">
+                                    <i class="fas fa-redo"></i> Refresh
+                                </button>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-secondary"
+                                        onclick="changePreviewRows(-10)">-10</button>
+                                    <button class="btn btn-sm btn-outline-secondary disabled" id="preview-rows-info">10
+                                        rows</button>
+                                    <button class="btn btn-sm btn-outline-secondary"
+                                        onclick="changePreviewRows(10)">+10</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive data-table">
+                                <table class="table table-hover table-sm" id="preview-table">
+                                    <thead id="preview-head"></thead>
+                                    <tbody id="preview-body"></tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-between mt-3">
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary" id="prev-page"
+                                        onclick="changePreviewPage(-1)">
+                                        <i class="fas fa-chevron-left"></i> Previous
+                                    </button>
+                                    <span class="mx-2">Page <span id="current-page">1</span></span>
+                                    <button class="btn btn-sm btn-outline-primary" id="next-page"
+                                        onclick="changePreviewPage(1)">
+                                        Next <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                <div class="text-muted">
+                                    Showing <span id="showing-rows">0</span> of <span id="total-rows">0</span> rows
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6><i class="fas fa-columns me-2"></i>Columns</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="columns-list" class="row"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6><i class="fas fa-info-circle me-2"></i>Data Types</h6>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm" id="dtypes-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Column</th>
+                                                <th>Data Type</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Section -->
+                <div id="statistics-section" class="section" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-chart-bar me-2"></i>Data Statistics</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-4" id="overall-stats"></div>
+
+                            <ul class="nav nav-tabs" id="statsTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="numeric-tab" data-bs-toggle="tab"
+                                        data-bs-target="#numeric" type="button">Numeric Columns</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="categorical-tab" data-bs-toggle="tab"
+                                        data-bs-target="#categorical" type="button">Categorical Columns</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="correlation-tab" data-bs-toggle="tab"
+                                        data-bs-target="#correlation" type="button">Correlations</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="missing-tab" data-bs-toggle="tab"
+                                        data-bs-target="#missing" type="button">Missing Data</button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content" id="statsTabContent">
+                                <div class="tab-pane fade show active" id="numeric" role="tabpanel">
+                                    <div id="numeric-stats"></div>
+                                </div>
+                                <div class="tab-pane fade" id="categorical" role="tabpanel">
+                                    <div id="categorical-stats"></div>
+                                </div>
+                                <div class="tab-pane fade" id="correlation" role="tabpanel">
+                                    <div class="plot-container" id="correlation-plot"></div>
+                                </div>
+                                <div class="tab-pane fade" id="missing" role="tabpanel">
+                                    <div id="missing-stats"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clean Data Section -->
+                <div id="clean-section" class="section" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-broom me-2"></i>Clean Data</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-warning text-dark">
+                                            <h6><i class="fas fa-exclamation-triangle me-2"></i>Missing Values</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="fill-missing"
+                                                    checked>
+                                                <label class="form-check-label" for="fill-missing">
+                                                    Fill Missing Values
+                                                </label>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Method:</label>
+                                                <select class="form-select" id="fill-method">
+                                                    <option value="mean">Mean</option>
+                                                    <option value="median">Median</option>
+                                                    <option value="mode">Mode</option>
+                                                    <option value="value">Specific Value</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3" id="fill-value-container" style="display: none;">
+                                                <label class="form-label">Fill Value:</label>
+                                                <input type="number" class="form-control" id="fill-value" value="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-info text-white">
+                                            <h6><i class="fas fa-filter me-2"></i>Outliers</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="remove-outliers">
+                                                <label class="form-check-label" for="remove-outliers">
+                                                    Remove Outliers
+                                                </label>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Method:</label>
+                                                <select class="form-select" id="outlier-method">
+                                                    <option value="zscore">Z-Score (3σ)</option>
+                                                    <option value="iqr">IQR (1.5x)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-success text-white">
+                                            <h6><i class="fas fa-tasks me-2"></i>Other Operations</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-check mb-3">
+                                                <input class="form-check-input" type="checkbox" id="remove-duplicates"
+                                                    checked>
+                                                <label class="form-check-label" for="remove-duplicates">
+                                                    Remove Duplicate Rows
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-3">
+                                                <input class="form-check-input" type="checkbox" id="convert-types"
+                                                    checked>
+                                                <label class="form-check-label" for="convert-types">
+                                                    Convert Data Types
+                                                </label>
+                                            </div>
+                                            <button class="btn btn-primary w-100" onclick="cleanData()">
+                                                <i class="fas fa-magic me-2"></i>Clean Data Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4" id="cleaning-result" style="display: none;">
+                                <div class="alert alert-success">
+                                    <h6><i class="fas fa-check-circle me-2"></i>Data Cleaned Successfully!</h6>
+                                    <p id="cleaning-message"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KQL Section -->
+                <div id="kql-section" class="section" style="display: none;">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-search me-2"></i>KQL Query</h5>
+                            <button class="btn btn-sm btn-outline-primary" onclick="showKQLExamples()">
+                                <i class="fas fa-lightbulb me-1"></i>Examples
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="mb-3">
+                                        <label class="form-label">Enter KQL Query:</label>
+                                        <div class="kql-editor" contenteditable="true" id="kql-query">
+                                            Data | where column_name > 100 | summarize avg_value=avg(numeric_column) by
+                                            category_column
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary" onclick="executeKQL()">
+                                        <i class="fas fa-play me-2"></i>Execute Query
+                                    </button>
+                                    <button class="btn btn-outline-secondary ms-2" onclick="clearKQL()">
+                                        <i class="fas fa-eraser me-2"></i>Clear
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-primary text-white">
+                                            <h6><i class="fas fa-info-circle me-2"></i>KQL Functions</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <small>
+                                                <strong>where:</strong> Filter rows<br>
+                                                <strong>summarize:</strong> Aggregate data<br>
+                                                <strong>project:</strong> Select columns<br>
+                                                <strong>extend:</strong> Add columns<br>
+                                                <strong>sort:</strong> Sort data<br>
+                                                <strong>take:</strong> Limit rows<br>
+                                                <strong>count:</strong> Count rows<br>
+                                                <strong>distinct:</strong> Unique values<br>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4" id="kql-result" style="display: none;">
+                                <div class="card">
+                                    <div class="card-header bg-success text-white">
+                                        <h6><i class="fas fa-table me-2"></i>Query Result</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive data-table">
+                                            <table class="table table-hover table-sm" id="kql-table">
+                                                <thead id="kql-head"></thead>
+                                                <tbody id="kql-body"></tbody>
+                                            </table>
+                                        </div>
+                                        <div class="mt-3 text-muted">
+                                            Returned <span id="kql-row-count">0</span> rows
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visualize Section -->
+                <div id="visualize-section" class="section" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-chart-pie me-2"></i>Data Visualization</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <label class="form-label">Chart Type:</label>
+                                    <select class="form-select" id="chart-type" onchange="updateChartForm()">
+                                        <option value="histogram">Histogram</option>
+                                        <option value="scatter">Scatter Plot</option>
+                                        <option value="line">Line Chart</option>
+                                        <option value="bar">Bar Chart</option>
+                                        <option value="box">Box Plot</option>
+                                        <option value="heatmap">Heatmap</option>
+                                        <option value="correlation">Correlation Matrix</option>
+                                        <option value="pie">Pie Chart</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-9" id="chart-form"></div>
+                            </div>
+
+                            <button class="btn btn-primary mb-3" onclick="generateChart()">
+                                <i class="fas fa-chart-line me-2"></i>Generate Chart
+                            </button>
+
+                            <div class="plot-container" id="chart-container"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transform Section -->
+                <div id="transform-section" class="section" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-cogs me-2"></i>Transform Data</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="nav nav-tabs" id="transformTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="aggregate-tab" data-bs-toggle="tab"
+                                        data-bs-target="#aggregate" type="button">Aggregate</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="filter-tab" data-bs-toggle="tab"
+                                        data-bs-target="#filter" type="button">Filter</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="pivot-tab" data-bs-toggle="tab" data-bs-target="#pivot"
+                                        type="button">Pivot</button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content" id="transformTabContent">
+                                <div class="tab-pane fade show active" id="aggregate" role="tabpanel">
+                                    <div class="row mt-3">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">Group By Columns:</label>
+                                                <select class="form-select" id="group-by" multiple></select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">Aggregation Functions:</label>
+                                                <div id="aggregation-functions"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary" onclick="aggregateData()">
+                                        <i class="fas fa-calculator me-2"></i>Aggregate Data
+                                    </button>
+                                </div>
+
+                                <div class="tab-pane fade" id="filter" role="tabpanel">
+                                    <div id="filter-conditions">
+                                        <div class="filter-condition mb-3">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <select class="form-select column-select">
+                                                        <option value="">Select Column</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <select class="form-select operator-select">
+                                                        <option value="equals">Equals</option>
+                                                        <option value="not_equals">Not Equals</option>
+                                                        <option value="greater_than">Greater Than</option>
+                                                        <option value="less_than">Less Than</option>
+                                                        <option value="contains">Contains</option>
+                                                        <option value="in">In</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <input type="text" class="form-control value-input"
+                                                        placeholder="Value">
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <button class="btn btn-sm btn-danger"
+                                                        onclick="removeFilterCondition(this)">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary mb-3" onclick="addFilterCondition()">
+                                        <i class="fas fa-plus me-1"></i>Add Condition
+                                    </button>
+                                    <div>
+                                        <button class="btn btn-primary" onclick="filterData()">
+                                            <i class="fas fa-filter me-2"></i>Apply Filter
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane fade" id="pivot" role="tabpanel">
+                                    <div class="row mt-3">
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label class="form-label">Index Column:</label>
+                                                <select class="form-select" id="pivot-index"></select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label class="form-label">Columns:</label>
+                                                <select class="form-select" id="pivot-columns"></select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label class="form-label">Values:</label>
+                                                <select class="form-select" id="pivot-values"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary" onclick="pivotData()">
+                                        <i class="fas fa-table me-2"></i>Create Pivot Table
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Section -->
+                <div id="export-section" class="section" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-download me-2"></i>Export Data</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-primary text-white">
+                                            <h6><i class="fas fa-file-csv me-2"></i>CSV Format</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Export data as comma-separated values. Best for compatibility.</p>
+                                            <button class="btn btn-outline-primary w-100" onclick="exportData('csv')">
+                                                <i class="fas fa-download me-2"></i>Export as CSV
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-success text-white">
+                                            <h6><i class="fas fa-file-excel me-2"></i>Excel Format</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Export as Excel file with formatting. Best for sharing.</p>
+                                            <button class="btn btn-outline-success w-100" onclick="exportData('excel')">
+                                                <i class="fas fa-download me-2"></i>Export as Excel
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-info text-white">
+                                            <h6><i class="fas fa-file-code me-2"></i>JSON Format</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Export as JSON for web applications and APIs.</p>
+                                            <button class="btn btn-outline-info w-100" onclick="exportData('json')">
+                                                <i class="fas fa-download me-2"></i>Export as JSON
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-warning text-dark">
+                                            <h6><i class="fas fa-file-alt me-2"></i>Parquet Format</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Export as Parquet for big data processing and storage efficiency.</p>
+                                            <button class="btn btn-outline-warning w-100"
+                                                onclick="exportData('parquet')">
+                                                <i class="fas fa-download me-2"></i>Export as Parquet
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-danger text-white">
+                                            <h6><i class="fas fa-trash-alt me-2"></i>Clear Session</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Clear current session and uploaded data.</p>
+                                            <button class="btn btn-outline-danger w-100" onclick="clearSession()">
+                                                <i class="fas fa-trash me-2"></i>Clear All Data
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KQL Examples Modal -->
+    <div class="modal fade" id="kqlExamplesModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-lightbulb me-2"></i>KQL Query Examples</h5>
+                    <button type="button" title="KQL Example" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="kql-examples-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // variables
+        let currentSession = null;
+        let currentPage = 1;
+        let rowsPerPage = 10;
+        let columns = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            const fileInput = document.getElementById('file-input');
+            const uploadArea = document.querySelector('.file-upload-area');
+
+            fileInput.addEventListener('change', handleFileUpload);
+
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.backgroundColor = '#e3f2fd';
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.backgroundColor = '#f8f9fa';
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.backgroundColor = '#f8f9fa';
+
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileUpload();
+                }
+            });
+            updateChartForm();
+        });
+
+        // file upload
+        async function handleFileUpload() {
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            showNotification('Uploading file...', 'info');
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    currentSession = result.session_id;
+                    updateSessionInfo(result.metadata);
+                    showFileInfo(result);
+                    showNotification('File uploaded successfully!', 'success');
+
+                    // Load preview
+                    setTimeout(() => {
+                        showSection('preview');
+                        loadPreview();
+                    }, 500);
+                } else {
+                    throw new Error(result.error || 'Upload failed');
+                }
+            } catch (error) {
+                showNotification(error.message, 'danger');
+            }
+        }
+
+        async function loadSample(type) {
+            showNotification(`Loading ${type} sample data...`, 'info');
+
+            setTimeout(() => {
+                showNotification('Sample data feature coming soon!', 'info');
+            }, 1000);
+        }
+
+        function updateSessionInfo(metadata) {
+            const sessionInfo = document.getElementById('session-info');
+            sessionInfo.textContent = `${metadata.file_name} (${metadata.row_count} rows)`;
+        }
+
+        function showFileInfo(result) {
+            const fileInfo = document.getElementById('file-info');
+            const metadata = result.metadata;
+
+            document.getElementById('info-filename').textContent = metadata.file_name;
+            document.getElementById('info-filesize').textContent = formatFileSize(metadata.file_size);
+            document.getElementById('info-rows').textContent = metadata.row_count.toLocaleString();
+            document.getElementById('info-columns').textContent = metadata.column_count.toLocaleString();
+
+            fileInfo.style.display = 'block';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+            });
+
+            document.getElementById(`${sectionId}-section`).style.display = 'block';
+
+            // active nav link
+            document.querySelectorAll('.sidebar a').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            document.querySelector(`a[onclick="showSection('${sectionId}')"]`).classList.add('active');
+
+            if (sectionId === 'preview') {
+                loadPreview();
+            } else if (sectionId === 'statistics') {
+                loadStatistics();
+            } else if (sectionId === 'kql') {
+                loadKQLColumns();
+            } else if (sectionId === 'visualize') {
+                loadVisualizationColumns();
+            } else if (sectionId === 'transform') {
+                loadTransformColumns();
+            }
+        }
+
+        // data preview
+        async function loadPreview(page = currentPage) {
+            if (!currentSession) {
+                showNotification('Please upload a file first', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/preview?page=${page}&rows=${rowsPerPage}`);
+                const result = await response.json();
+
+                if (response.ok) {
+                    columns = result.columns;
+                    currentPage = page;
+
+                    // pagination
+                    document.getElementById('current-page').textContent = page;
+                    document.getElementById('total-rows').textContent = result.total_rows.toLocaleString();
+                    document.getElementById('showing-rows').textContent = Math.min(rowsPerPage, result.data.length).toLocaleString();
+                    document.getElementById('preview-rows-info').textContent = `${rowsPerPage} rows`;
+
+                    // Enable/disable pagination buttons
+                    document.getElementById('prev-page').disabled = page <= 1;
+                    document.getElementById('next-page').disabled = (page * rowsPerPage) >= result.total_rows;
+
+                    renderPreviewTable(result);
+                    renderColumnsList(result);
+                    renderDataTypes(result);
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                showNotification(error.message, 'danger');
+            }
+        }
+
+        // Change preview page
+        function changePreviewPage(delta) {
+            const newPage = currentPage + delta;
+            if (newPage >= 1) {
+                loadPreview(newPage);
+            }
+        }
+
+        // Change preview rows
+        function changePreviewRows(delta) {
+            rowsPerPage = Math.max(10, rowsPerPage + delta);
+            loadPreview(currentPage);
+        }
+
+        // Render preview table
+        function renderPreviewTable(result) {
+            const thead = document.getElementById('preview-head');
+            const tbody = document.getElementById('preview-body');
+
+            // Clear existing content
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+
+            const headerRow = document.createElement('tr');
+            result.columns.forEach(col => {
+                const th = document.createElement('th');
+                th.textContent = col;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+
+            result.data.forEach(row => {
+                const tr = document.createElement('tr');
+                result.columns.forEach(col => {
+                    const td = document.createElement('td');
+                    td.textContent = row[col] !== null && row[col] !== undefined ? row[col] : '';
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderColumnsList(result) {
+            const container = document.getElementById('columns-list');
+            container.innerHTML = '';
+
+            result.columns.forEach((col, index) => {
+                const colDiv = document.createElement('div');
+                colDiv.className = 'col-md-3 mb-2';
+                colDiv.innerHTML = `
+                    <div class="card">
+                        <div class="card-body p-2">
+                            <small>
+                                <strong>${col}</strong><br>
+                                <span class="text-muted">${result.dtypes[col] || 'unknown'}</span>
+                            </small>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(colDiv);
+            });
+        }
+
+        function renderDataTypes(result) {
+            const tbody = document.querySelector('#dtypes-table tbody');
+            tbody.innerHTML = '';
+
+            for (const [col, dtype] of Object.entries(result.dtypes)) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${col}</td>
+                    <td><span class="badge bg-info">${dtype}</span></td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        async function loadStatistics() {
+            if (!currentSession) {
+                showNotification('Please upload a file first', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch('/statistics');
+                const result = await response.json();
+
+                if (response.ok) {
+                    renderStatistics(result);
+
+                    setTimeout(() => {
+                        generateCorrelationPlot();
+                    }, 100);
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                showNotification(error.message, 'danger');
+            }
+        }
+
+        function renderStatistics(stats) {
+            const overallStats = document.getElementById('overall-stats');
+            overallStats.innerHTML = `
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <h3>${stats.overall.total_rows.toLocaleString()}</h3>
+                        <p>Total Rows</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <h3>${stats.overall.total_columns.toLocaleString()}</h3>
+                        <p>Total Columns</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <h3>${stats.overall.total_cells.toLocaleString()}</h3>
+                        <p>Total Cells</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <h3>${stats.overall.memory_usage_mb.toFixed(2)}</h3>
+                        <p>Memory (MB)</p>
+                    </div>
+                </div>
+            `;
+
+            const numericStats = document.getElementById('numeric-stats');
+            let numericHTML = '<div class="row">';
+
+            for (const [col, colStats] of Object.entries(stats.columns)) {
+                if (colStats.mean !== undefined) {
+                    numericHTML += `
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-header">
+                                    <strong>${col}</strong>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm">
+                                        <tr><td>Mean:</td><td>${colStats.mean.toFixed(4)}</td></tr>
+                                        <tr><td>Std Dev:</td><td>${colStats.std.toFixed(4)}</td></tr>
+                                        <tr><td>Min:</td><td>${colStats.min.toFixed(4)}</td></tr>
+                                        <tr><td>Max:</td><td>${colStats.max.toFixed(4)}</td></tr>
+                                        <tr><td>Median:</td><td>${colStats.median.toFixed(4)}</td></tr>
+                                        <tr><td>Missing:</td><td>${colStats.missing_values} (${colStats.missing_percentage.toFixed(2)}%)</td></tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            numericHTML += '</div>';
+            numericStats.innerHTML = numericHTML;
+
+            const categoricalStats = document.getElementById('categorical-stats');
+            let categoricalHTML = '<div class="row">';
+
+            for (const [col, colStats] of Object.entries(stats.columns)) {
+                if (colStats.most_common !== undefined) {
+                    categoricalHTML += `
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-header">
+                                    <strong>${col}</strong>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm">
+                                        <tr><td>Unique Values:</td><td>${colStats.unique_values}</td></tr>
+                                        <tr><td>Most Common:</td><td>${colStats.most_common}</td></tr>
+                                        <tr><td>Count:</td><td>${colStats.most_common_count}</td></tr>
+                                        <tr><td>Missing:</td><td>${colStats.missing_values} (${colStats.missing_percentage.toFixed(2)}%)</td></tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            categoricalHTML += '</div>';
+            categoricalStats.innerHTML = categoricalHTML;
+
+            // Missing data
+            const missingStats = document.getElementById('missing-stats');
+            let missingHTML = '<div class="row"><div class="col-md-6"><h6>Missing Values by Column:</h6><table class="table table-sm"><thead><tr><th>Column</th><th>Missing</th><th>Percentage</th></tr></thead><tbody>';
+
+            for (const [col, missingCount] of Object.entries(stats.missing_data.pattern)) {
+                const percentage = (missingCount / stats.overall.total_rows * 100).toFixed(2);
+                missingHTML += `<tr><td>${col}</td><td>${missingCount}</td><td>${percentage}%</td></tr>`;
+            }
+
+            missingHTML += `</tbody></table></div><div class="col-md-6"><div class="card"><div class="card-body"><h6>Summary</h6><p>Total missing values: ${stats.missing_data.total_missing.toLocaleString()}</p><p>Overall completeness: ${(100 - (stats.missing_data.total_missing / (stats.overall.total_rows * stats.overall.total_columns) * 100)).toFixed(2)}%</p></div></div></div></div>`;
+            missingStats.innerHTML = missingHTML;
+        }
+
+        async function generateCorrelationPlot() {
+            try {
+                const response = await fetch('/visualize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: 'correlation',
+                        params: {}
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    Plotly.newPlot('correlation-plot', result.plotly_json.data, result.plotly_json.layout);
+                }
+            } catch (error) {
+                console.error('Error generating correlation plot:', error);
+            }
+        }
+
+        async function cleanData() {
+            if (!currentSession) {
+                showNotification('Please upload a file first', 'warning');
+                return;
+            }
+
+            const methods = {
+                fill_missing: document.getElementById('fill-missing').checked ?
+                    document.getElementById('fill-method').value : false,
+                fill_value: parseFloat(document.getElementById('fill-value').value) || 0,
+                remove_duplicates: document.getElementById('remove-duplicates').checked,
+                remove_outliers: document.getElementById('remove-outliers').checked,
+                outlier_method: document.getElementById('outlier-method').value,
+                convert_types: document.getElementById('convert-types').checked
+            };
+
+            try {
+                const response = await fetch('/clean', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ methods })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showNotification(result.message, 'success');
+
+                    const cleaningResult = document.getElementById('cleaning-result');
+                    const cleaningMessage = document.getElementById('cleaning-message');
+
+                    cleaningMessage.textContent = `Data cleaned successfully. New shape: ${result.new_shape.rows} rows × ${result.new_shape.columns} columns`;
+                    cleaningResult.style.display = 'block';
+
+                    setTimeout(() => {
+                        loadPreview();
+                        loadStatistics();
+                    }, 1000);
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                showNotification(error.message, 'danger');
+            }
+        }
+
+        document.getElementById('fill-method').addEventListener('change', function () {
+            const fillValueContainer = document.getElementById('fill-value-container');
+            fillValueContainer.style.display = this.value === 'value' ? 'block' : 'none';
+        });
+
+        // Execute KQL query
+        async function executeKQL() {
+            if (!currentSession) {
+                showNotification('Please upload a file first', 'warning');
+                return;
+            }
+
+            const query = document.getElementById('kql-query').textContent.trim();
+
+            if (!query) {
+                showNotification('Please enter a KQL query', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch('/kql/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    renderKQLResult(result);
+                    showNotification('Query executed successfully', 'success');
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                showNotification(error.message, 'danger');
+            }
+        }
+
+        function renderKQLResult(result) {
+            const kqlResult = document.getElementById('kql-result');
+            const kqlHead = document.getElementById('kql-head');
+            const kqlBody = document.getElementById('kql-body');
+            const kqlRowCount = document.getElementById('kql-row-count');
+
+            kqlHead.innerHTML = '';
+            kqlBody.innerHTML = '';
+
+            const headerRow = document.createElement('tr');
+            result.columns.forEach(col => {
+                const th = document.createElement('th');
+                th.textContent = col;
+                headerRow.appendChild(th);
+            });
+            kqlHead.appendChild(headerRow);
+
+            result.data.forEach(row => {
+                const tr = document.createElement('tr');
+                result.columns.forEach(col => {
+                    const td = document.createElement('td');
+                    td.textContent = row[col] !== null && row[col] !== undefined ? row[col] : '';
+                    tr.appendChild(td);
+                });
+                kqlBody.appendChild(tr);
+            });
+
+            kqlRowCount.textContent = result.row_count.toLocaleString();
+
+            kqlResult.style.display = 'block';
+        }
+
+        function clearKQL() {
+            document.getElementById('kql-query').textContent = '';
+        }
+
+        // Show KQL examples
+        async function showKQLExamples() {
+            if (!currentSession) {
+                showNotification('Please upload a file first', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch('/kql/examples');
+                const result = await response.json();
+
+                if (response.ok) {
+                    renderKQLExamples(result.examples);
+                    new bootstrap.Modal(document.getElementById('kqlExamplesModal')).show();
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                showNotification(error.message, 'danger');
+            }
+        }
+
+        function renderKQLExamples(examples) {
+            const container = document.getElementById('kql-examples-list');
+            container.innerHTML = '';
+
+            examples.forEach(example => {
+                const exampleDiv = document.createElement('div');
+                exampleDiv.className = 'card mb-3';
+                exampleDiv.innerHTML = `
+                    <div class="card-body">
+                        <h6 class="card-title">${example.name}</h6>
+                        <div class="kql-editor mb-2">${example.query}</div>
+                        <p class="card-text text-muted">${example.description}</p>
+                        <button class="btn btn-sm btn-outline-primary" onclick="useExample('${example.query.replace(/'/g, "\\'")}')">
+                            Use This Example
+                        </button>
+                    </div>
+                `;
+                container.appendChild(exampleDiv);
+            });
+        }
+
+        function useExample(query) {
+            document.getElementById('kql-query').textContent = query;
+            bootstrap.Modal.getInstance(document.getElementById('kqlExamplesModal')).hide();
+        }
+
+        async function loadKQLColumns() {
+        }
+
+        function updateChartForm() {
+            const chartType = document.getElementById('chart-type').value;
+            const chartForm = document.getElementById('chart-form');
+
+            let html = '';
+
+            if (chartType === 'histogram') {
+                html = `
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Column:</label>
+                            <select class="form-select" id="histogram-column"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Color By:</label>
+                            <select class="form-select" id="histogram-color">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Number of Bins:</label>
+                            <input type="number" class="form-control" id="histogram-bins" value="30" min="5" max="100">
+                        </div>
+                    </div>
+                `;
+            } else if (chartType === 'scatter') {
+                html = `
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">X Column:</label>
+                            <select class="form-select" id="scatter-x"></select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Y Column:</label>
+                            <select class="form-select" id="scatter-y"></select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Color By:</label>
+                            <select class="form-select" id="scatter-color">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Size By:</label>
+                            <select class="form-select" id="scatter-size">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            } else if (chartType === 'line') {
+                html = `
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">X Column:</label>
+                            <select class="form-select" id="line-x"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Y Column:</label>
+                            <select class="form-select" id="line-y"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Color By:</label>
+                            <select class="form-select" id="line-color">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            } else if (chartType === 'bar') {
+                html = `
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">X Column:</label>
+                            <select class="form-select" id="bar-x"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Y Column:</label>
+                            <select class="form-select" id="bar-y"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Color By:</label>
+                            <select class="form-select" id="bar-color">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            } else if (chartType === 'pie') {
+                html = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Names Column:</label>
+                            <select class="form-select" id="pie-names"></select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Values Column:</label>
+                            <select class="form-select" id="pie-values"></select>
+                        </div>
+                    </div>
+                `;
+            }
+
+            chartForm.innerHTML = html;
+            loadVisualizationColumns();
+        }
+
+        function loadVisualizationColumns() {
+            const chartType = document.getElementById('chart-type').value;
+            const selectElements = document.querySelectorAll('#chart-form select');
+
+            selectElements.forEach(select => {
+                while (select.options.length > 1) {
+                    select.remove(1);
+                }
+
+                columns.forEach(col => {
+                    const option = document.createElement('option');
+                    option.value = col;
+                    option.textContent = col;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        async function generateChart() {
+            if (!currentSession) {
+                showNotification('Please upload a file first', 'warning');
+                return;
+            }
+
+            const chartType = document.getElementById('chart-type').value;
+            let params = {};
+
+            if (chartType === 'histogram') {
+                params = {
+                    column: document.getElementById('histogram-column').value,
+                    color: document.getElementById('histogram-color').value || null,
+                    nbins: parseInt(document.getElementById('histogram-bins').value) || null
+                };
+
+                if (!params.column) {
+                    showNotification('Please select a column for histogram', 'warning');
+                    return;
+                }
+            } else if (chartType === 'scatter') {
+                params = {
+                    x_column: document.getElementById('scatter-x').value,
+                    y_column: document.getElementById('scatter-y').value,
+                    color_column: document.getElementById('scatter-color').value || null,
+                    size_column: document.getElementById('scatter-size').value || null
+                };
+
+                if (!params.x_column || !params.y_column) {
+                    showNotification('Please select X and Y columns', 'warning');
+                    return;
+                }
+            } else if (chartType === 'line') {
+                params = {
+                    x_column: document.getElementById('line-x').value,
+                    y_column: document.getElementById('line-y').value,
+                    color_column: document.getElementById('line-color').value || null
+                };
+
+                if (!params.x_column || !params.y_column) {
+                    showNotification('Please select X and Y columns', 'warning');
+                    return;
+                }
+            } else if (chartType === 'bar') {
+                params = {
+                    x_column: document.getElementById('bar-x').value,
+                    y_column: document.getElementById('bar-y').value,
+                    color_column: document.getElementById('bar-color').value || null
+                };
+
+                if (!params.x_column || !params.y_column) {
+                    showNotification('Please select X and Y columns', 'warning');
+                    return;
+                }
+            } else if (chartType === 'pie') {
+                params = {
+                    names_column: document.getElementById('pie-names').value,
+                    values_column: document.getElementById('pie-values').value
+                };
+
+                if (!params.names_column || !params.values_column) {
+                    showNotification('Please select names and values columns', 'warning');
+                    return;
+                }
+            } else if (chartType === 'correlation') {
+                params = {};
+            } else if (chartType === 'box' || chartType === 'heatmap') {
+                showNotification('This chart type requires additional configuration', 'info');
+                return;
+            }
+
+            try {
+                const response = await fetch('/visualize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: chartType,
+                        params: params
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    Plotly.newPlot('chart-container', result.plotly_json.data, result.plotly_json.layout);
+                    showNotification('Chart generated successfully', 'success');
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                showNotification(error.message, 'danger');
+            }
+        }
+
+        function loadTransformColumns() {
+            const groupBy = document.getElementById('group-by');
+            groupBy.innerHTML = '<option value="">Select columns...</option>';
+            columns.forEach(col => {
+                const option = document.createElement('option');
+                option.value = col;
+                option.textContent = col;
+                groupBy.appendChild(option);
+            });
+
+            const columnSelects = document.querySelectorAll('.column-select');
+            columnSelects.forEach(select => {
+                select.innerHTML = '<option value="">Select Column</option>';
+                columns.forEach(col => {
+                    const option = document.createElement('option');
+                    option.value = col;
+                    option.textContent = col;
+                    select.appendChild(option);
+                });
+            });
+
+            // pivot
+            const pivotIndex = document.getElementById('pivot-index');
+            const pivotColumns = document.getElementById('pivot-columns');
+            const pivotValues = document.getElementById('pivot-values');
+
+            [pivotIndex, pivotColumns, pivotValues].forEach(select => {
+                select.innerHTML = '<option value="">Select column...</option>';
+                columns.forEach(col => {
+                    const option = document.createElement('option');
+                    option.value = col;
+                    option.textContent = col;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        // filter condition
+        function addFilterCondition() {
+            const container = document.getElementById('filter-conditions');
+            const conditionDiv = document.createElement('div');
+            conditionDiv.className = 'filter-condition mb-3';
+            conditionDiv.innerHTML = `
+                <div class="row">
+                    <div class="col-md-4">
+                        <select class="form-select column-select">
+                            <option value="">Select Column</option>
+                            ${columns.map(col => `<option value="${col}">${col}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select operator-select">
+                            <option value="equals">Equals</option>
+                            <option value="not_equals">Not Equals</option>
+                            <option value="greater_than">Greater Than</option>
+                            <option value="less_than">Less Than</option>
+                            <option value="contains">Contains</option>
+                            <option value="in">In</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control value-input" placeholder="Value">
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-sm btn-danger" onclick="removeFilterCondition(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(conditionDiv);
+        }
+
+        function removeFilterCondition(button) {
+            button.closest('.filter-condition').remove();
+        }
+
+        async function aggregateData() {
+            if (!currentSession) {
+                showNotification('Please upload a file first', 'warning');
+                return;
+            }
+
+            const groupBy = Array.from(document.getElementById('group-by').selectedOptions)
+                .map(option => option.value);
+
+            try {
+                const response = await fetch('/aggregate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        group_by: groupBy,
+                        aggregations: {}
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showNotification(result.message, 'success');
+                    showNotification('Data aggregated successfully. Check the preview tab.', 'success');
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                showNotification(error.message, 'danger');
+            }
+        }
+
+        // Filter data
+        async function filterData() {
+            if (!currentSession) {
+                showNotification('Please upload a file first', 'warning');
+                return;
+            }
+
+            const conditions = [];
+            const conditionElements = document.querySelectorAll('.filter-condition');
+
+            conditionElements.forEach(element => {
+                const column = element.querySelector('.column-select').value;
+                const operator = element.querySelector('.operator-select').value;
+                const value = element.querySelector('.value-input').value;
+
+                if (column && value) {
+                    conditions.push({
+                        column: column,
+                        operator: operator,
+                        value: operator === 'in' ? value.split(',').map(v => v.trim()) : value
+                    });
+                }
+            });
+
+            if (conditions.length === 0) {
+                showNotification('Please add at least one filter condition', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch('/filter', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ conditions })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showNotification(result.message, 'success');
+                    showNotification('Data filtered successfully. Check the preview tab.', 'success');
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                showNotification(error.message, 'danger');
+            }
+        }
+
+        // Pivot data
+        async function pivotData() {
+            showNotification('Pivot functionality requires additional configuration', 'info');
+        }
+
+        // Export data
+        async function exportData(format) {
+            if (!currentSession) {
+                showNotification('Please upload a file first', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch('/export', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ format })
+                });
+
+                if (response.ok) {
+                    // download link
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `export_${new Date().toISOString().slice(0, 10)}.${format}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+
+                    showNotification(`Data exported as ${format.toUpperCase()}`, 'success');
+                } else {
+                    const result = await response.json();
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                showNotification(error.message, 'danger');
+            }
+        }
+
+        async function clearSession() {
+            try {
+                const response = await fetch('/session/clear', {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    currentSession = null;
+                    document.getElementById('session-info').textContent = '';
+                    document.getElementById('file-info').style.display = 'none';
+                    showNotification('Session cleared successfully', 'success');
+
+                    setTimeout(() => {
+                        showSection('upload');
+                    }, 1000);
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                showNotification(error.message, 'danger');
+            }
+        }
+
+        // Notification system
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            const notificationMessage = document.getElementById('notification-message');
+
+            notificationMessage.textContent = message;
+            notification.className = `notification alert alert-${type} show`;
+
+            setTimeout(hideNotification, 5000);  // after 5 seconds hide
+        }
+
+        function hideNotification() {
+            const notification = document.getElementById('notification');
+            notification.classList.remove('show');
+        }
+    </script>
+</body>
+
+</html>

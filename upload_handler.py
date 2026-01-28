@@ -11,7 +11,6 @@ from odf.table import Table, TableRow, TableCell
 from odf.text import P
 
 class FileUploadHandler:
-    """Handles file uploads and converts to DataFrame"""
     
     def __init__(self):
         self.supported_extensions = {
@@ -26,7 +25,6 @@ class FileUploadHandler:
         }
     
     def process_file(self, file_path: Path) -> Tuple[pd.DataFrame, Dict[str, Any]]:
-        """Process uploaded file and return DataFrame with metadata"""
         ext = file_path.suffix.lower()
         
         if ext not in self.supported_extensions:
@@ -58,7 +56,6 @@ class FileUploadHandler:
                           encoding='utf-8', engine='python')
     
     def _read_excel(self, file_path: Path) -> pd.DataFrame:
-        """Read Excel files (xlsx, xls, xltx)"""
         try:
             excel_file = pd.ExcelFile(file_path)
             

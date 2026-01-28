@@ -7,6 +7,6 @@ flask
 plotly
 kqlmagic
 pyarrow
-scipy>
+scipy
 matplotlib
 python-dotenv
