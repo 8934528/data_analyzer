@@ -12,45 +12,45 @@ A comprehensive web-based data analysis platform that supports multiple file for
 
 ### Multi-Format Support
 
-CSV: Comma-separated values files
-Excel: .xlsx, .xls, .xlsb, .xltx formats
-OpenDocument: .ods spreadsheets
-Parquet: Efficient columnar storage format
-JSON: JavaScript Object Notation
+- CSV: Comma-separated values files
+- Excel: .xlsx, .xls, .xlsb, .xltx formats
+- OpenDocument: .ods spreadsheets
+- Parquet: Efficient columnar storage format
+- JSON: JavaScript Object Notation
 
 ### KQL-Based Query Engine
 
-Kusto Query Language (KQL) syntax for data exploration
-Real-time query execution
-Built-in query examples and templates
-Support for filtering, aggregation, and transformation
+- Kusto Query Language (KQL) syntax for data exploration
+- Real-time query execution
+- Built-in query examples and templates
+- Support for filtering, aggregation, and transformation
 
 ### Interactive Visualizations
 
-Histograms, scatter plots, line charts, bar charts
-Box plots, heatmaps, correlation matrices, pie charts
-Interactive Plotly charts with zoom and pan
-Customizable chart parameters
+- Histograms, scatter plots, line charts, bar charts
+- Box plots, heatmaps, correlation matrices, pie charts
+- Interactive Plotly charts with zoom and pan
+- Customizable chart parameters
 
 ### Data Transformation
 
-Aggregation with group by operations
-Advanced filtering with multiple conditions
-Pivot table creation
-Real-time data preview
+- Aggregation with group by operations
+- Advanced filtering with multiple conditions
+- Pivot table creation
+- Real-time data preview
 
 ### Export Capabilities
 
-Multiple output formats: CSV, Excel, JSON, Parquet
-Download processed data
-Session management
+- Multiple output formats: CSV, Excel, JSON, Parquet
+- Download processed data
+- Session management
 
 ### User-Friendly Interface
 
-Modern web-based UI
-Drag & drop file upload
-Real-time preview
-Responsive design
+- Modern web-based UI
+- Drag & drop file upload
+- Real-time preview
+- Responsive design
 
 ---
 
