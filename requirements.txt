@@ -1,0 +1,12 @@
+pandas
+numpy
+openpyxl
+odfpy
+xlrd
+flask
+plotly
+kqlmagic
+pyarrow
+scipy>
+matplotlib
+python-dotenv
